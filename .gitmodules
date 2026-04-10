@@ -1,0 +1,3 @@
+[submodule "Abalone dataset/abalone-frontend"]
+	path = Abalone dataset/abalone-frontend
+	url = https://github.com/beingthakur26/abalone-dataset-ml-model.git
