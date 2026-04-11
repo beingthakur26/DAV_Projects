@@ -1,6 +1,6 @@
 // Use your deployed Render URL here in production
-const PRODUCTION_API_URL = 'https://your-titanic-api.onrender.com'; 
-const LOCAL_API_URL = 'http://localhost:5000';
+const PRODUCTION_API_URL = 'https://titanic-survival-api-ef66.onrender.com'; 
+const LOCAL_API_URL = 'https://titanic-survival-api-ef66.onrender.com';
 
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
     ? LOCAL_API_URL 
