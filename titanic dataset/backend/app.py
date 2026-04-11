@@ -5,7 +5,7 @@ Serves the trained Random Forest model via REST API
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import pickle
+import joblib
 import pandas as pd
 import numpy as np
 import os
@@ -15,24 +15,23 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend requests
 
 # ============ LOAD SAVED MODEL & PREPROCESSING INFO ============
-print("🔄 Loading model and preprocessing data...")
+print("Loading model and preprocessing data...")
 
 # Get the directory of this script
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Load trained model
-with open(os.path.join(BASE_DIR, 'models', 'titanic_model.pkl'), 'rb') as f:
-    model = pickle.load(f)
-
-# Load feature names
-with open(os.path.join(BASE_DIR, 'models', 'titanic_features.pkl'), 'rb') as f:
-    final_features = pickle.load(f)
-
-# Load preprocessing information
-with open(os.path.join(BASE_DIR, 'models', 'titanic_preprocessing.pkl'), 'rb') as f:
-    preprocessing_info = pickle.load(f)
-
-print("✅ Model loaded successfully")
+try:
+    model = joblib.load(os.path.join(BASE_DIR, 'models', 'titanic_model.joblib'))
+    final_features = joblib.load(os.path.join(BASE_DIR, 'models', 'titanic_features.joblib'))
+    preprocessing_info = joblib.load(os.path.join(BASE_DIR, 'models', 'titanic_preprocessing.joblib'))
+    print("Model loaded successfully")
+except Exception as e:
+    print(f"Error loading model: {e}")
+    # Initialize with None to prevent crashing, but will fail gracefully on request
+    model = None
+    final_features = None
+    preprocessing_info = None
 
 
 # ============ HEALTH CHECK ENDPOINT ============
@@ -40,7 +39,7 @@ print("✅ Model loaded successfully")
 def health_check():
     """Check if API is running"""
     return jsonify({
-        'status': 'API is running ✅',
+        'status': 'API is running',
         'model': 'Titanic Survival Predictor',
         'accuracy': '81.56%'
     }), 200
@@ -66,6 +65,12 @@ def predict():
     try:
         # Get JSON data from request
         data = request.get_json()
+        
+        if model is None:
+            return jsonify({
+                'error': 'Model not loaded. Please check server logs.',
+                'status': 'error'
+            }), 500
         
         # Validate required fields
         required_fields = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Embarked']
@@ -138,7 +143,7 @@ def predict():
         response = {
             'status': 'success',
             'prediction': int(prediction),
-            'prediction_text': 'SURVIVED ✅' if prediction == 1 else 'DID NOT SURVIVE ❌',
+            'prediction_text': 'SURVIVED' if prediction == 1 else 'DID NOT SURVIVE',
             'confidence': {
                 'did_not_survive': float(probabilities[0]) * 100,
                 'survived': float(probabilities[1]) * 100
@@ -215,14 +220,14 @@ def server_error(error):
 # ============ RUN SERVER ============
 if __name__ == '__main__':
     print("\n" + "="*60)
-    print("🚀 Titanic Survival Predictor API")
+    print("Titanic Survival Predictor API")
     print("="*60)
-    print("\n📍 Available Endpoints:")
+    print("\nAvailable Endpoints:")
     print("  • GET  /health           - Check if API is running")
     print("  • POST /predict          - Make a prediction")
     print("  • GET  /features         - Get required features")
     print("  • GET  /example          - Get example input")
-    print("\n🔗 API Documentation:")
+    print("\nAPI Documentation:")
     print("  Base URL: https://titanic-survival-api-ef66.onrender.com")
     print("  POST https://titanic-survival-api-ef66.onrender.com/predict")
     print("\n" + "="*60 + "\n")
