@@ -1,4 +1,4 @@
-// Use your deployed Render URL here in production
+// Use your deployed Render URL here
 const PRODUCTION_API_URL = 'https://titanic-survival-api-ef66.onrender.com'; 
 const LOCAL_API_URL = 'https://titanic-survival-api-ef66.onrender.com';
 
@@ -23,12 +23,35 @@ const resClass = document.getElementById('res-class');
 const resFamily = document.getElementById('res-family');
 const resetBtn = document.getElementById('reset-btn');
 
+
+// ✅ FIX 1: Proper timeout (fetch doesn't support timeout)
+function fetchWithTimeout(url, options = {}, timeout = 20000) {
+    return Promise.race([
+        fetch(url, options),
+        new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Request Timeout')), timeout)
+        )
+    ]);
+}
+
+// ✅ FIX 2: Retry logic (handles Render cold start)
+async function fetchWithRetry(url, options, retries = 2) {
+    for (let i = 0; i <= retries; i++) {
+        try {
+            return await fetchWithTimeout(url, options);
+        } catch (err) {
+            if (i === retries) throw err;
+        }
+    }
+}
+
+
 /**
  * Check Backend API Status
  */
 async function checkApiStatus() {
     try {
-        const response = await fetch(`${API_BASE}/health`, { timeout: 3000 });
+        const response = await fetchWithTimeout(`${API_BASE}/health`);
         if (response.ok) {
             statusDot.className = 'status-dot online';
             statusText.innerText = 'System Online (AI Model Ready)';
@@ -37,9 +60,10 @@ async function checkApiStatus() {
         }
     } catch (err) {
         statusDot.className = 'status-dot offline';
-        statusText.innerText = 'System Offline (Start app.py)';
+        statusText.innerText = 'System Offline (Server waking up or unreachable)';
     }
 }
+
 
 /**
  * Handle Form Submission
@@ -63,7 +87,7 @@ form.addEventListener('submit', async (e) => {
     };
 
     try {
-        const response = await fetch(`${API_BASE}/predict`, {
+        const response = await fetchWithRetry(`${API_BASE}/predict`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -80,11 +104,14 @@ form.addEventListener('submit', async (e) => {
         }
     } catch (err) {
         console.error('Prediction Error:', err);
-        alert('Could not connect to the prediction server. Please ensure app.py is running on port 5000.');
+
+        // ✅ FIX 3: Realistic error message
+        alert('Server is waking up or unreachable. Try again in a few seconds.');
     } finally {
         loadingOverlay.classList.add('hidden');
     }
 });
+
 
 /**
  * Display Prediction Results with Animations
@@ -102,21 +129,21 @@ function displayResults(data) {
 
     // Update Confidence Bar
     resConfidencePct.innerText = `${Math.round(confidence)}%`;
-    resConfidenceFill.style.width = '0%'; // Reset for animation
+    resConfidenceFill.style.width = '0%';
     
     // Update Details
     const classNames = { 1: '1st Class', 2: '2nd Class', 3: '3rd Class' };
     resClass.innerText = classNames[data.input_data.Pclass];
     resFamily.innerText = `${data.input_data.FamilySize} Member(s)`;
 
-    // Show Result with animation
+    // Show Result
     resultSide.classList.remove('hidden');
     
-    // Delayed animation for progress bar
     setTimeout(() => {
         resConfidenceFill.style.width = `${confidence}%`;
     }, 100);
 }
+
 
 /**
  * Reset UI
@@ -126,7 +153,9 @@ resetBtn.addEventListener('click', () => {
     form.reset();
 });
 
+
 // Initial Status Check
 checkApiStatus();
-// Periodically check status
+
+// Periodic health check
 setInterval(checkApiStatus, 15000);
