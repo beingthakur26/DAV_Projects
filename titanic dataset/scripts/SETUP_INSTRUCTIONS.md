@@ -35,7 +35,7 @@ pip install -r requirements.txt
 ```bash
 python app.py
 ```
-✅ API will run on: **http://localhost:5000**
+✅ API will run on: **https://titanic-survival-api-ef66.onrender.com**
 
 API Endpoints:
 - `GET /health` - Check if API is running

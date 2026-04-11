@@ -26,7 +26,7 @@ echo.
 echo ✅ Both servers are starting!
 echo.
 echo 🔗 Frontend: http://localhost:5173
-echo 🔗 API: http://localhost:5000
+echo 🔗 API: https://titanic-survival-api-ef66.onrender.com
 echo.
 echo 💡 Tip: Open frontend URL in your browser
 echo.

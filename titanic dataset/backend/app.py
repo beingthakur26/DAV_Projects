@@ -223,8 +223,8 @@ if __name__ == '__main__':
     print("  • GET  /features         - Get required features")
     print("  • GET  /example          - Get example input")
     print("\n🔗 API Documentation:")
-    print("  Base URL: http://localhost:5000")
-    print("  POST http://localhost:5000/predict")
+    print("  Base URL: https://titanic-survival-api-ef66.onrender.com")
+    print("  POST https://titanic-survival-api-ef66.onrender.com/predict")
     print("\n" + "="*60 + "\n")
     
     # Run on all interfaces so it can be accessed from frontend

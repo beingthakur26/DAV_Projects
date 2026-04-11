@@ -73,8 +73,8 @@ Expected: `Local: http://localhost:5173` ✅
 | Service | URL | Default Port |
 |---------|-----|--------------|
 | **Frontend** | http://localhost:5173 | 5173 |
-| **Backend API** | http://localhost:5000 | 5000 |
-| **Health Check** | http://localhost:5000/health | 5000 |
+| **Backend API** | https://titanic-survival-api-ef66.onrender.com | 5000 |
+| **Health Check** | https://titanic-survival-api-ef66.onrender.com/health | 5000 |
 
 ## ✨ Features Checklist
 
@@ -128,22 +128,22 @@ Expected: SURVIVED ✅ (Children had priority)
 
 ### 1. Health Check
 ```bash
-curl http://localhost:5000/health
+curl https://titanic-survival-api-ef66.onrender.com/health
 ```
 
 ### 2. Get Features
 ```bash
-curl http://localhost:5000/features
+curl https://titanic-survival-api-ef66.onrender.com/features
 ```
 
 ### 3. Get Example Input
 ```bash
-curl http://localhost:5000/example
+curl https://titanic-survival-api-ef66.onrender.com/example
 ```
 
 ### 4. Make Prediction
 ```bash
-curl -X POST http://localhost:5000/predict \
+curl -X POST https://titanic-survival-api-ef66.onrender.com/predict \
   -H "Content-Type: application/json" \
   -d '{
     "Pclass": 1,
